@@ -23,7 +23,7 @@
     (reduce + (map * iseq prob-seq))))
 
 (defn true-beta [true-avg]
-  (let [beta-range (range -2 2 0.001)
+  (let [beta-range (range -10 10 0.001)
         avg-seq (map tot-sum beta-range)
         diff-seq (map i/abs (map #(- % true-avg) avg-seq))]
     (nth beta-range (.indexOf diff-seq (reduce min diff-seq)))))

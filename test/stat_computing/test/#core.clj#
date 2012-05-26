@@ -1,8 +1,0 @@
-(ns stat-computing.test.core
-  (:use [stat-computing.core])
-  (:use [clojure.test]))
-
-(deftest replace-me ;; FIXME: write
-  (is false "No tests have been written."))
-
-

@@ -160,12 +160,10 @@
   [pdf row col & opt]
   (i/matrix (partition col (apply pdf (* row col) opt))))
 
-
-(def X (random-mat s/sample-uniform 100 3))
-(def Z (random-mat s/sample-normal  100 3 :mean 5))
-
 (def iv-projection-matrix
-  (let [zt (i/trans Z)
+  (let [X (random-mat s/sample-uniform 100 3)
+        Z (random-mat s/sample-normal  100 3 :mean 5)
+        zt (i/trans Z)
         ztzi (i/solve (i/mmult zt Z))]
     (i/mmult Z ztzi zt)))
 
