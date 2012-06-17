@@ -9,3 +9,6 @@
 /.lein-deps-sum
 .Rhistory 
 .DS_Store
+.Rhistory
+*.tex
+*.pdf
