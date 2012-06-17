@@ -27,9 +27,10 @@
 #+LATEX: \newcommand{\V}{\mathbb{V}}
 #+LATEX: \newcommand{\sigs}{\sigma^2}
 
+
 I have just taken a graduate-level course in industrial organization.  It has become clear that the heuristic models that are used to teach the core concepts are somewhat fragile.  In some cases, relaxing assumptions only slightly yields a very different set of conclustions -- some of which are counterintuitive.  The purpose of the models -- as I understand it -- is to provide some structure to empirical study; to offer a testable hypothesis based on economic insight.  The problem, here, is that by relaxing the (ver strict) assumptions, the conclusions are often subject to massive swings in both implied magnitude and directionality of the model impacts.  The following set of examples illustrate that just about any outcome is feasible -- even within the constraints of the model -- when just a little uncertainty is added to a few basic models.  
 
-All of the supporting code is included in the public Github repository \texttt{stat-computing}, including the \texttt{org-mode} files that compile to this document.  The project is mainly written in Clojure; but a few examples are written in \texttt{R}.  Still, the project is structured as a Clojure project, with instructions on how to compile and run the examples in the front-page readme.
+All of the supporting code is included in the public Github repository [[https://github.com/danhammer/stat-computing][\texttt{stat-computing}]], including the \texttt{org-mode} files that compile to this document.  Most of the examples can be found in the [[https://github.com/danhammer/stat-computing/blob/master/src/computing/io-simulation.clj][\texttt{io-simulation}]] namespace.  The project is mainly written in Clojure; but a few examples are written in \texttt{R}.  Still, the project is structured as a Clojure project, with instructions on how to compile and run the examples in the front-page readme.
 
 ** Existence of informed consumers
 
