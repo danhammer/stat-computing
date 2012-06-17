@@ -1,6 +1,5 @@
 (ns computing.dice
-  (:use [cascalog.api]
-        [clojure.contrib.combinatorics :only [subsets]]
+  (:use [clojure.contrib.combinatorics :only [subsets]]
         [computing.data :only [ndvi]])
   (:require [incanter.core :as i]
             [incanter.io :as io]

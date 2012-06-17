@@ -1,10 +1,55 @@
 (ns computing.io-simulation
-  (:use [cascalog.api]
-        [clojure.math.numeric-tower :only (expt)])
+  (:use [clojure.math.numeric-tower :only (expt)])
   (:require [incanter.core :as i]
             [incanter.io :as io]
             [incanter.charts :as c]
             [incanter.stats :as s]))
+
+
+;; Example 1: Effect of uncertainty in the proportion of informed
+;; consumers on average 
+
+(defn quality-condition
+  "returns the value of the quality condition that determines whether
+  a firm produces a high- or low-quality product."
+  [c-high c-low alpha]
+  (let [inv-alpha (- 1 alpha)]
+    (/ (+ c-high (* inv-alpha c-low)) alpha)))
+
+(defn choose-high
+  "returns 1 if the price exceeds the quality condition and 0
+  otherwise"
+  [price c-high c-low alpha]
+  (let [quality-cond (quality-condition c-high c-low alpha)]
+    (if (> price quality-cond) 1 0)))
+
+(defn avg-quality
+  "returns the average product quality via MC estimation with `B`
+  repititions, based on supplied parameters indicating the cost to
+  product the high- and low-quality products; the true proportion of
+  informed consumers; and the standard deviation around truth."
+  [B price c-high c-low alpha-mean alpha-sd]
+  (let [partial-qual (partial choose-high price c-high c-low)
+        alpha-seq (s/sample-normal B :mean alpha-mean :sd alpha-sd)]
+    (s/mean (map partial-qual alpha-seq))))
+
+(defn graph-qual
+  "returns an incanter-plot object (to be viewed or saved) of the
+  relationship between variance of the informed consumer parameter and
+  the average product quality.  Note that this example, as written,
+  will take a few seconds to run.
+
+  Example usage:
+  (i/save (graph-qual) \"~/Dropbox/mc-est.png\")"
+  []
+  (let [qual-fn (partial avg-quality 10000 16 5 2 0.4)
+        x-seq (range 0.0001 1 0.0001)]
+    (doto (c/xy-plot x-seq (map qual-fn x-seq))
+      (c/set-y-range 0.45 1.05)
+      (c/set-y-label "average quality")
+      (c/set-x-label "standard error"))))
+
+;; TODO: CLEAN UP THE FOLLOWING CODE:
 
 (defn sample-bernoulli [n p]
   (map #(if (> % p) 1 0) (s/sample-uniform n)))
@@ -191,29 +236,5 @@
 (defn convex-cost [r] (i/pow r 2))
 (defn concave-revenue [r] (i/pow r 0.5))
 
-;; Informed consumers, externality on uniformed consumers
 
-(defn quality-condition
-  [c-high c-low alpha]
-  (let [inv-alpha (- 1 alpha)]
-    (/ (+ c-high (* inv-alpha c-low)) alpha)))
-
-(defn choose-high
-  [price c-high c-low alpha]
-  (let [quality-cond (quality-condition c-high c-low alpha)]
-    (if (> price quality-cond) 1 0)))
-
-;; (choose-high 16 5 2 0.4) => 1 (qual-cond = 15.5)
-
-(defn avg-quality
-  [B price c-high c-low alpha-mean alpha-sd]
-  (let [partial-qual (partial choose-high price c-high c-low)
-        alpha-seq (s/sample-normal B :mean alpha-mean :sd alpha-sd)]
-    (s/mean (map partial-qual alpha-seq))))
-
-(defn graph-qual
-  []
-  (let [qual-fn (partial avg-quality 10000 16 5 2 0.4)
-        x-seq (range 0.0001 1 0.0001)]
-    (i/view (c/xy-plot x-seq (map qual-fn x-seq)))))
 
