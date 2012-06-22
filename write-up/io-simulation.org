@@ -26,7 +26,8 @@
 #+LATEX: \newcommand{\E}{\mathbb{E}}
 #+LATEX: \newcommand{\V}{\mathbb{V}}
 #+LATEX: \newcommand{\sigs}{\sigma^2}
-
+#+LATEX: \renewcommand{\Exp}{\mathbb{E}(\pi)}
+#+LATEX: \renewcommand{\disc}{\frac{\delta}{1-\delta}\Exp}
 
 I have just taken a graduate-level course in industrial organization.  It has become clear that the heuristic models that are used to teach the core concepts are somewhat fragile.  In some cases, relaxing assumptions only slightly yields a very different set of conclustions -- some of which are counterintuitive.  The purpose of the models -- as I understand it -- is to provide some structure to empirical study; to offer a testable hypothesis based on economic insight.  The problem, here, is that by relaxing the (ver strict) assumptions, the conclusions are often subject to massive swings in both implied magnitude and directionality of the model impacts.  The following set of examples illustrate that just about any outcome is feasible -- even within the constraints of the model -- when just a little uncertainty is added to a few basic models.  
 
@@ -65,7 +66,7 @@ Consider a dummy example where $c_0 = 2$; $c_1 = 5$; $p = 16$; and the true prop
 \label{e:est}
 p > \frac{c_1 - c_0}{\hat{\alpha}_i} + c_0 \Rightarrow \hat{\alpha}_i > \frac{3}{14}
 \end{equation}
-We can therefore find the average quality as a function of $\sigma^2$ through Monte Carlo simulation, which will specify the effect of increased uncertainty on product quality in the market.  The code for this example is provided in the Github repository in the \texttt{io-simulation} namespace.  
+We can therefore find the average quality as a function of $\sigma$ through Monte Carlo simulation, which will specify the effect of increased uncertainty on product quality in the market.  The code for this example is provided in the Github repository in the [[https://github.com/danhammer/stat-computing/blob/master/src/computing/io-simulation.clj][\texttt{io-simulation}]] namespace (linked [[https://github.com/danhammer/stat-computing/blob/master/src/computing/io-simulation.clj][here]]).
 
 The resulting graph is presented in Figure (\ref{f:mc}).  The variation around the curve is a result of the finite number of firms.  As the number of firms increases, the simulated results will be a tighter fit around the curve.  This example reflects the rate at which the area to the left of $3/14 \approx 0.214$ under a normal distribution with mean $0.4$ changes as the variance increases.
 
@@ -74,7 +75,57 @@ The resulting graph is presented in Figure (\ref{f:mc}).  The variation around t
 #+ATTR_LaTeX: width=10cm
 [[file:mc-est.png]]
 
-The graph illustrates a common theme throughout this set of examples.  Introducing a small amount of uncertainty in a single parameter can change the interpretation of model parameters or even alter the implied direction of a model effect.  The shape of the function in Figure (\ref{f:mc}) may be interesting because it implies that, although the true proportion of informed consumers does not change, the uncertainty around that parameter has a non-monotonic effect on average product quality.  That is, over a certain range of uncertainty, firms will on average supply lower quality products.  As the uncertainty increases beyond a standard error of approximately 0.15, however, the effect is reversed: more uncertainty implies a higher average product quality.  
+The graph illustrates a common theme throughout this set of examples.  Introducing a small amount of uncertainty in a single parameter can change the interpretation of model parameters or even alter the implied direction of a model effect.  In this example, although the true proportion of informed consumers does not change, the firms perceptions (or misperceptions) of the state of the world affect the quality level -- and the relationship is not monotonic.  An increase in the standard error about $\alpha$ will decrease average product quality up to approximately 0.15 standard deviations; after that, the effect of additional uncertainty is an increase in average product quality.
 
-This example alone does not completely illustrate my overall point that model implications are very fragile and suceptible to change when subjected to slight uncertainty; but it does suggest that many outcomes may be feasible within the model's framework, depending on uncertainty and interactions between uncertain parameters.  In this case, the analysis does suggest a potentially testable hypothesis, but even this slightly more general hypothesis is fragile subject to uncertainty in other parameters.
+The utility of this model is unclear.  Suppose we have data on a product's quality that can be separated from price.  Take, for example, data on high-end wine prices that can be considered somewhat independent from vintage quality.  Suppose we also have information on an exogenous shock to the composition of the consumer base of high-end wine; something that increases the uncertainty about the proportion of informed consumers in the market.  Both a negative and positive effect of the shift on product quality are consistent with the model.  An almost impossible argument would have to be made to identify the range of uncertainty of $\alpha$ faced by the firms.  
+
+This is a /very/ restricted example.  However, as shown in the following selection of examples, there are many instances where the model -- which is meant to inform empirical study -- ends up being less than useful when relaxing assumptions only slightly.
+
+# The shape of the function in Figure (\ref{f:mc}) may be interesting because it implies that, although the true proportion of informed consumers does not change, the uncertainty around that parameter has a non-monotonic effect on average product quality.  That is, over a certain range of uncertainty, firms will on average supply lower quality products.  As the uncertainty increases beyond a standard error of approximately 0.15, however, the effect is reversed: more uncertainty implies a higher average product quality.  
+
+# This example alone does not completely illustrate my overall point that model implications are very fragile and suceptible to change when subjected to slight uncertainty; but it does suggest that many outcomes may be feasible within the model's framework, depending on uncertainty and interactions between uncertain parameters.  In this case, the analysis does suggest a potentially testable hypothesis, but even this slightly more general hypothesis is fragile subject to uncertainty in other parameters.
+
+** Collusion and repeated interactions
+
+Consider an infinitely repeated Bertrand pricing game played by two firms.  The firms produce a homogenous good, with equal marginal costs of production $c_0$. There is a probability $\alpha$ of having higher costs $c_1>c_0$ for both firms, and a $1-\alpha$ probability the costs remain the same in the next period. Costs are independently and identically distributed over time, and monopoly profits are decreasing in marginal costs.  It follows that $\pi_1 < \pi_0$.  Denote the discount factor equal to $\delta$.  Assume that if there is ever a deviation from monopoly pricing, the game reverts to marginal cost pricing for $T$ periods. First, we derive conditions that implicitly define the critical $\delta$ to sustain monopoly prices.
+
+We can sustain monopoly pricing if
+\begin{eqnarray}
+\frac{\pi_0}{2} + \disc &\geq& \pi_0 + \delta^T \disc \\
+\frac{\pi_1}{2} + \disc &\geq& \pi_1 + \delta^T \disc 
+\end{eqnarray}
+with $\Exp = \alpha \pi(c_0) + (1 - \alpha) \pi(c_1)$ and $T > 0$.  Collecting terms, conditions can be rewritten as the following in order to implicitly define the critical value of $\delta$ to sustain prices higher than marginal cost:
+\begin{eqnarray}
+(1 - \delta^T) \disc &\geq& \frac{\pi_0}{2} \\
+(1 - \delta^T) \disc &\geq& \frac{\pi_1}{2}
+\end{eqnarray}
+Note that condition (4) is satisfied if (3) is satisfied, since $\pi_1 < \pi_0$ by assumption.  It follows that the critical $\delta^*$ satisfies the equality:
+\begin{equation}
+(1- (\delta^{*})^T)\frac{\delta^{*}}{1-\delta^{*}}\Exp - \frac{\pi_0}{2} = 0
+\end{equation}
+Call the left-hand side $g(\cdot)$.  The condition required to sustain monopoly prices is $g(\cdot) \geq 0$.  Consider the partial derivative:
+\[
+\frac{\partial g}{\partial T} = -\delta^{T}\disc\ln \delta > 0,
+\]
+since we assume that $0 < \delta < 1$ so that $\ln \delta < 0$.\footnote{We could also assume that $0 \leq \delta \leq 1$, but this just complicates things without offering additional insight.}  As we tend toward the fully grim strategy -- the nuclear option -- where $T \rightarrow \infty$, the incentive to cheat decreases monotonically.  The incentive compatability constraint is more likely to be satisfied as $T$ increases.  This makes sense: the cheater gets no second chances (or only after a /very/ long time) and cannot factor in the more favorable prices associated with a second chance into his/her choice decision.
+
+Suppose that the fixed $T$ is not known to the firms.  That is, suppose that each firm can only infer the true value of $T$ from previous interactions.  The idea, here, is to see how sensitive these results are to a little uncertainty.  Let $n$ indicate the length of the interaction history.  We can construct a situation where $g(\cdot) > 0$, so that if $T$ were known (along with the other parameters, but that's a different story) the firms would /never/ cheat.  For this situation, we set $\delta = 0.35$, $\pi(c_0) = 12$,  $\pi(c_1) = 9$, $\alpha = 0.75$, and the true, unkown $T = 5$.  Note that $g(\cdot) = 0.0259 > 0$, so that the firms choose to collude.  This story is consistent with a situation whereby the firms are in fact identical in their strategies, but don't know it themselves.  Instead, each firm treats $T$ as a random variable distributed $Exp(\lambda)$, so that $\E(T) = \lambda^{-1}$.  The choice of this distribution reflects the fact that $T$ is the wait time between events, specifically new collusion events.  The maximum likelihood estimate of $\lambda$ is distributed $N(\hat{\lambda},\hat{\lambda}^2/n)$.  The distrubtion of $g(\cdot)$ is not easy to calculate directly, but we can simulate the empirical density function using Monte Carlo techniques.  Figure \ref{fig:ss} shows the density function, along with the cutoff condition.  In this constructed example, when $n=10$ the probability of cheating (by MC integration with 100,000 repetitions) is roughly $0.3443$; when $n=100$ the probability is $0.1012$; and when $n=1000$ the probability is 0.  That is, as the number of interactions increases, the estimate of $T$ becomes tighter around truth -- and the collusion outcome implied by the binding incentive compatability equation is assured.
+
+
+
+# Consider a market with two price-setting firms that sell a homogenous product.  The firms are identical and are able to collude.  If the firms collude, they split monopoly profits $\pi$ equally; if not, the undercutting firm will receive all monopoly profits for the cheat period (less an arbitrarily small amount from undercutting the other firm's price),  At any time, demand for the product is either /high/ or /low/, with probability $\alpha$ of being in a high state.  Demand for the product is independent and identically distributed over time.  It can be shown that the binding incentive compatability constraint is
+# \begin{equation}
+# \label{e:bc}
+# \frac{\pi_2}{2} + \frac{\delta}{(1 - \delta)}\E(\pi) \geq \pi_2,
+# \end{equation}
+# where $\pi_2$ is the monopoly profits in the high demand state.  That is, the firms will collude as long as the The collusive price in the low demand state (with monopoly profits $\pi_1$) if the collusive price in the high demand state can be sustained, given expected profits and the firms' discount rate. Note that expected profit is $\E(\pi) = \alpha \cdot \pi_2 + (1 - \alpha)\cdot\pi_1$. Solving (\ref{e:bc}) for $\delta$, we find the critical discount rate:
+# \[
+# \delta^{*} = \frac{\pi_2}{2\E(\pi) + \pi_2}
+# \]
+# If the firms discount rate $\delta \geq \delta^*$, then the incentive compatability constraint in Equation (\ref{e:cc}) holds and the firm will not cheat; otherwise the firm will cheat.  The code to calcualte the critical discount rate and to indicate the validity of the incentive compatability constraint is given here:
+
+# We assume that both firms know the true probability of the high- and low-profit states of the world.  Actually, we assume a lot more than this, but for now we consider what happens if we relax this one assumption.  If $p$ is the true probability of the high-profit state, then the firms observe a sequence of Bernoulli trials with /success/ being the high-profit state.  It is not unreasonable to assume that the firms will base their assessment of expected profits on the sequence of observed states.  As the sequence lengthens, then the maximimum likelihood estimate of $p$ becomes tighter around the true values; specifically, the variance is given by $\hat{p}\cdot(1-\hat{p})/n$, where $n$ is the number of historical trials. 
+
+# I am making this more complicated than it needs to be.  Consider the situation where the firms' discount rate is 0.40.  At this discount rate, any value of $p > 0.50$ implies that the firms should /never/ cheat.  The expected profits in the next period are too high to suffer the retribution associated with cheating in this period.  Suppose that the true probability is 0.58.  The firms should always collude.  That is, in code, 
+
 
