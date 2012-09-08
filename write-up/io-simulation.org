@@ -35,7 +35,7 @@ All of the supporting code is included in the public Github repository [[https:/
 
 ** Existence of informed consumers
 
-Consider a standard model of vertical product differentiation with $N$ consumers.  Of the $N$ consumers only a fraction $\alpha$ are informed; the rest are unable to distinguish between two quality levels $s=0$ and $s=1$ before the product is purchased.  Only one unit can be bought in this simple model.  Consumer preferences are identical for all consumers, with their utility function defined as follows:
+Consider a standard model of vertical product differentiation with $N$ consumers.  Of the $N$ consumers only a fraction are informed; the rest are unable to distinguish between two quality levels $s=0$ and $s=1$ before the product is purchased.  Only one unit of the good can be purchased in this simple, static model; and consumer preferences for the product are identical. The consumer utility function is given by the following:
 \begin{equation}
 U(\theta, s, p) = \left\{
   \begin{array}{ll}
@@ -43,13 +43,13 @@ U(\theta, s, p) = \left\{
         0 & \mbox{otherwise}.
   \end{array} \right.
 \end{equation}
-where $p$ is the price of one unit of the product and $\theta$ is a parameter that represents the consumer's valuation of quality.  Suppose that the high quality product ($s=1$) is more expensive to produce, so that the marginal cost $c_1 > c_0$.  Assume that each firm in the competitive market can only produce one type of product.   Moreover, suppose that the uninformed consumer believes that high price signals high quality, whereas the informed consumer is able to infer quality by prior knowledge.  In this straightforward and abstracted model, the equilibrium price and quality are easily calculated.  
+where $p$ is the price of one unit of the product and $\theta$ is a parameter that represents the consumer's valuation of quality.  Suppose that the high quality product ($s=1$) is more expensive to produce, so that the marginal cost $c_1$ is greater than $c_0$.  The firm chooses in advance of the sale to consumers which quality of product to produce.  Assume that the uninformed consumer believes that high price signals high quality, whereas the informed consumer is able to distinguish the true quality level without a price signal.  In this straightforward and abstracted model, the equilibrium price and quality are easily calculated.  
 
-The informed consumers purchase the product if $s = 1$ and $p < \theta$.  The uninformed consumers always buy if the price is high.  The firm will choose $p$ and $s$ to maximize profits.  For any level of $s$, the profit-maximizing firm will always choose a high price, $p \equiv p^h$.  The firm's profits vary by quality level:
+The informed consumers purchase the product if $s = 1$ and $p < \theta$.  The uninformed consumers always buy if the price is high.  The firm will choose $p$ and $s$ to maximize profits.  For each level of $s$, the profit-maximizing firm will always choose a high price, $p \equiv p^{high}$.  The firm's profits vary by quality level:
 \[
 \begin{array}{ll}
-  s = 1: & \pi_1 = p - c_1 \\
-  s = 0: & \pi_0 = (1 - \alpha)(p - c_0)
+  \mbox{for } s = 1, & \pi_1 = p - c_1 \\
+  \mbox{for } s = 0, & \pi_0 = (1 - \alpha)(p - c_0)
 \end{array}
 \]
 The firm will choose to supply a high-quality product when $\pi_1 > \pi_0$, or equivalently when $p- c_1 > (1 - \alpha)(p - c_0)$.  Rearranging, the condition to supply a high-quality product is 
@@ -58,17 +58,17 @@ The firm will choose to supply a high-quality product when $\pi_1 > \pi_0$, or e
 p > \frac{c_1 - (1-\alpha)c_0}{\alpha} = \frac{c_1 - c_0}{\alpha} + c_0
 \end{equation}
 It is clear from Equation (\ref{e:high}) that as the proportion of informed consumers increases (as $\alpha$ increases) the firms are more likely to supply a high-quality product; the right-hand side of the inequality becomes /easier/ to satisfy.  This makes sense.  With more informed consumers in the market, the firms are forced to supply a higher quality product to /all/ consumers.  The informed consumers impose a welcome, positive externality on the uninformed.
-
+nn
 It is reasonable to assume that the true proportion of informed consumers in the market is not known to the firms.  Instead each firm has a perception of the true $\alpha$ and will make supply decisions accordingly.  The quality level is no longer consant across firms; each firm has an individual notion of the true proportion.  Suppose that these perceptions are normally distributed around the true proportion.  A natural question, then, is how the average quality changes as the spread around the true proportion increases.
 
-Consider a dummy example where $c_0 = 2$; $c_1 = 5$; $p = 16$; and the true proportion $\alpha = 0.4$.  If $\alpha$ were known to all firms, then the right-hand side of Equation (\ref{e:high}) would be equal to 15.5, so that the inequality condition is /always/ satisfied.  The average product quality in the market would therefore be 1.  We can examine the effect of increased uncertainty about the true $\alpha$ by simulating a market with 10,000 firms.  Let $\hat{\alpha} \sim N(\alpha, \sigma^2)$ be the perceived proportion of informed buyers for each firm.  In this example, firm $i$ will choose to produce high quality goods if the following condition is met:
+Consider a dummy example where $c_0 = 2$, $c_1 = 5$, $p = 16$ and the true proportion $\alpha = 0.4$.  If $\alpha$ were known to all firms, then the right-hand side of Equation (\ref{e:high}) would be equal to 15.5, so that the incentive compatibil condition is /always/ satisfied.  The average product quality in the market would therefore be 1.  We can examine the effect of increased uncertainty about the true $\alpha$ by simulating a market with 10,000 firms.  Let $\hat{\alpha} \sim N(\alpha, \sigma^2)$ be the perceived proportion of informed buyers for each firm.  In this example, firm $i$ will choose to produce high quality goods if the following condition is met:
 \begin{equation}
 \label{e:est}
 p > \frac{c_1 - c_0}{\hat{\alpha}_i} + c_0 \Rightarrow \hat{\alpha}_i > \frac{3}{14}
 \end{equation}
 We can therefore find the average quality as a function of $\sigma$ through Monte Carlo simulation, which will specify the effect of increased uncertainty on product quality in the market.  The code for this example is provided in the Github repository in the [[https://github.com/danhammer/stat-computing/blob/master/src/computing/io-simulation.clj][\texttt{io-simulation}]] namespace (linked [[https://github.com/danhammer/stat-computing/blob/master/src/computing/io-simulation.clj][here]]).
 
-The resulting graph is presented in Figure (\ref{f:mc}).  The variation around the curve is a result of the finite number of firms.  As the number of firms increases, the simulated results will be a tighter fit around the curve.  This example reflects the rate at which the area to the left of $3/14 \approx 0.214$ under a normal distribution with mean $0.4$ changes as the variance increases.
+The resulting graph is presented in Figure (\ref{f:mc}).  The variation around the curve is a result of the finite number of firms.  As the number of firms increases, the simulated results will be a tighter fit around the curve.  This example reflects the rate at which the area to the left of $3/14 \approx 0.214$ under a normal distribution with mean $0.4$ changes as variance increases.
 
 #+CAPTION:    Average quality as a function of $\V(\hat{\alpha})$
 #+LABEL:      f:mc
@@ -87,7 +87,9 @@ This is a /very/ restricted example.  However, as shown in the following selecti
 
 ** Collusion and repeated interactions
 
-Consider an infinitely repeated Bertrand pricing game played by two firms.  The firms produce a homogenous good, with equal marginal costs of production $c_0$. There is a probability $\alpha$ of having higher costs $c_1>c_0$ for both firms, and a $1-\alpha$ probability the costs remain the same in the next period. Costs are independently and identically distributed over time, and monopoly profits are decreasing in marginal costs.  It follows that $\pi_1 < \pi_0$.  Denote the discount factor equal to $\delta$.  Assume that if there is ever a deviation from monopoly pricing, the game reverts to marginal cost pricing for $T$ periods. First, we derive conditions that implicitly define the critical $\delta$ to sustain monopoly prices.
+Consider an infinitely repeated Bertrand pricing game played by two firms.  The firms produce a homogenous good, with equal marginal costs of production. There are two states of the world: one where marginal costs are low, and one where marginal costs are high.  There is a probability $\alpha$ of the low cost state, and the states are independently and identically distributed over time.  Monopoly profits are decreasing in marginal costs, so that $c_0 < c_1$ and $\pi_1 < \pi_0$.  The firms' discount factor is $\delta$.  
+
+We assume that the firms adopt a punishment strategy so that if there is ever a deviation from monopoly pricing, the game reverts to marginal cost pricing for $T$ periods. First, we derive conditions that implicitly define the critical $\delta$ to sustain monopoly prices.
 
 We can sustain monopoly pricing if
 \begin{eqnarray}
