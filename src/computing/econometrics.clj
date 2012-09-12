@@ -8,6 +8,11 @@
             [incanter.stats :as s]
             [incanter.charts :as c]))
 
+;; Dynamic programming
+
+(def R (range 1 10))
+
+
 ;; Monte Carlo estimation of mean and standard error of the mean
 ;; page 154-155 of Statistical Computing for R
 
