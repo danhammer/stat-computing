@@ -102,12 +102,12 @@
                   (mmult-col _x weight)
                   :intercept false)))
 
-(def fgls-coeffs
-  "returns the coefficients of FGLS estimation on the Card data set."
-  (let [data (io/read-dataset "data/NLS80.csv" :header true)
-        y (i/matrix (i/$ :lwage my-data))
-        X (cofactor-mat my-data :exper :tenure :married :south :urban :black :educ)]
-    (fgls y X)))
+;; (def fgls-coeffs
+;;   "returns the coefficients of FGLS estimation on the Card data set."
+;;   (let [data (io/read-dataset "data/NLS80.csv" :header true)
+;;         y (i/matrix (i/$ :lwage my-data))
+;;         X (cofactor-mat my-data :exper :tenure :married :south :urban :black :educ)]
+;;     (fgls y X)))
 
 ;; Newey-west
 

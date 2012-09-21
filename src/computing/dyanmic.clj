@@ -4,53 +4,66 @@
   (:require [incanter.core :as i]))
 
 (def iteration-spec
-  (let [Rgrid (range 0.1 8 0.1)]
+  (let [Rgrid (range 0.1 100 0.1)]
     {:thresh 0.0001
      :grid Rgrid
      :init-vals (repeat (count Rgrid) 0)}))
 
 (def util-spec
   "A map that defines the utility and resource transition functions."
-  {:nu 2
-   :eps 0.1
+  {:eta 2
+   :eps 0.01
    :alpha 1
-   :beta 0.95
-   :cons 1
-   :apprec 0.3
-   :delta 0.1})
+   :beta 0.9
+   :gamma 0
+   :k 0
+   :delta 0})
 
 (defn consumption-vector
   "Returns a vector of /positive/ consumption possibilities for a
   given resource endowment `r`"
-  [{:keys [nu eps alpha beta cons apprec delta]} r]
-  (let [val (+ (i/pow r apprec) (* r (- 1 delta)))]
-    (filter pos? (map #(- val %) Rgrid))))
+  [{:keys [eta eps alpha beta k gamma delta]} r] 
+ (let [val (+ (i/pow r gamma) (* r (- 1 delta)))]
+    (filter pos? (map #(- val %) (:grid iteration-spec)))))
 
 (defn util
   "Accepts the parameter map `params` and returns the value of the
   utility function at the value of consumption `c`"
-  [{:keys [nu eps alpha beta cons a]} c]
-  (let [nu-sub (- 1 nu)]
-    (* (/ alpha nu-sub)
-       (- (i/pow (+ c eps) nu-sub) cons))))
+  [{:keys [eta eps alpha beta k gamma delta]} c]
+  (let [eta-sub (- 1 eta)]
+    (* (/ alpha eta-sub)
+       (- (i/pow (+ c eps) eta-sub) k))))
 
-(defn best-consumption
-  "Accepts the "
-  [param-map old-vals r]
-  (let [util-vec (map (partial util param-map)
-                      (consumption-vector param-map r))
-        disc-val (map #(* (:beta param-map) %) old-vals)
-        last-vec (map + util-vec disc-val)]
-    (reduce max last-vec)))
+(defn best-value
+  "Accepts the parameter map that defines the utility function and
+  discount rate; returns the value of the best possible consumption
+  allocation.  Relies on the fact that the value function is
+  monotonically increasing in resource consumpion (nonsatiation).
+  That is, we can collect the maximum value function instead of
+  keeping track of the index of the maximum consumption, and then
+  calculating the value."
+  [util-params old-vals r]
+  (let [util-vec (map (partial util util-params)
+                      (consumption-vector util-params r))
+        bellman-fn (fn [x y] (+ x (* (:beta util-params) y)))]
+    (reduce max (map bellman-fn util-vec old-vals))))
 
 (defn iter-val
-  [iteration-params util-params n]
-  (let [plot1 (xy-plot)
+  "Accepts a parameterization of the utility function and the
+  iteration process, and returns an incanter plot instance of the
+  convergence process to the optimal resource consumption path.
+
+    Example usage: (iter-val iteration-spec util-spec)"
+  [iteration-params util-params]
+  (let [graph (xy-plot)
         {:keys [thresh grid init-vals]} iteration-params]
     (loop [old-val init-vals
            diff 100]
       (if (< thresh diff)
-        (let [new-val (map (partial best-consumption util-params old-val) grid)]
-          (do (add-lines plot1 grid old-val)
+        (let [new-val (map (partial best-value util-params old-val) grid)]
+          (do (add-lines graph grid old-val)
               (recur new-val (euclidean-distance new-val old-val))))
-        plot1))))
+        (-> graph
+            (set-title "Convergence of value functions")
+            (set-x-label "Resource")
+            (set-y-label "Value"))))))
