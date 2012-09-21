@@ -55,11 +55,11 @@ smoothing."
 (defn bivariate-kexp
   "Conditional expectation of y, given xs.  Avoid divide by zero
   error."
-  [f h yi-vec xi-vec xs]
+  [f h yi-vec ys xi-vec xs]
   (let [kern-x (kern-dens f h xi-vec xs)]
     (if (zero? kern-x)
       nil
-      (/ (kern-dens f h yi-vec xi-vec xs) kern-x))))
+      (/ (kern-dens f h yi-vec ys xi-vec xs) kern-x))))
 
 (defn bivariate-kreg
   "Returns a vector of conditional expectations of the dependent
