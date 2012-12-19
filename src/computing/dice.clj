@@ -1,13 +1,11 @@
 (ns computing.dice
   (:require [incanter.core :as i]
             [incanter.optimize :as optimize]
-            [incanter.charts :as c]))
-
-;; Tweet: Information theory example in #clojure: dice
-;; problem. #infotheory
+            [incanter.charts :as c]
+            [incanter.stats :as s]))
 
 ;; Given the observed average from rolling a six-sided die many times,
-;; what are the probabilities associated with each side of the die.
+;; what are the probabilities associated with each side of the die?
 ;; For a fair die, all sides are equally likely, such that the
 ;; probability is 1/6 for each side.  If we roll the fair die
 ;; thousands of times, the distribution of observed averages will be
@@ -60,20 +58,19 @@
   "Plots the probabilities associated with each face of the dice,
   given the observed average from simulation."
   [empirical-avg]
-  (i/view (doto (c/bar-chart (range 1 7) (prob-seq empirical-avg))
-            (c/set-y-label "probabilities")
-            (c/set-x-label "die faces")
-            (c/set-title (str "True average: " empirical-avg)))))
+  (doto (c/bar-chart (range 1 7) (prob-seq empirical-avg))
+    (c/set-y-label "probabilities")
+    (c/set-x-label "die faces")
+    (c/set-title (str "observed average: " empirical-avg))))
 
 (defn dyn-graph
-  "Plots the probabilities associated with each face of the dice,
-  given the observed average from simulation."
-  [empirical-avg]
-  (i/view (doto (c/bar-chart (range 1 7) (prob-seq empirical-avg))
-            (c/set-y-label "probabilities")
-            (c/set-x-label "die faces")
-            (c/set-title (str "True average: " empirical-avg)))))
-
-(defn dyn-slider
-  [plot]
-  (c/slider #(i/set-data plot [(prob-seq %)]) (range 1.5 2.5 0.01)))
+  "plot the probabilitiy distribution with a slider to adjust the
+  empirical average"
+  []
+  (let [x (range 1 7)]
+    (def pdf-chart (doto (c/scatter-plot)
+                     (c/set-y-label "probabilities")
+                     (c/set-x-label "die faces")))
+    (i/view pdf-chart) 
+    (c/sliders [mean (range 1.01 5.99 0.01)]
+               (i/set-data pdf-chart [x  (prob-seq mean)]))))
