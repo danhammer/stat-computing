@@ -1,0 +1,35 @@
+#+AUTHOR:     
+#+TITLE:      
+#+OPTIONS:     toc:nil num:nil 
+#+LATEX_HEADER: \usepackage{mathrsfs}
+#+LATEX_HEADER: \usepackage{graphicx}
+#+LATEX_HEADER: \usepackage{comment}
+#+LATEX_HEADER: \usepackage{amstex}
+#+LATEX_HEADER: \usepackage{booktabs}
+#+LATEX_HEADER: \usepackage{dcolumn}
+#+LATEX_HEADER: \usepackage{subfigure}
+#+LATEX_HEADER: \usepackage[margin=1in]{geometry}
+#+LATEX_HEADER: \RequirePackage{fancyvrb}
+#+LATEX_HEADER: \DefineVerbatimEnvironment{verbatim}{Verbatim}{fontsize=\small,formatcom = {\color[rgb]{0.1,0.2,0.9}}}
+#+LATEX: \setlength{\parindent}{0in}
+#+LATEX: \renewcommand{\X}{{\bf X}}
+#+LATEX: \renewcommand{\uab}{\bar{U}_A}
+#+LATEX: \renewcommand{\ubb}{\bar{U}_B}
+#+LATEX: \renewcommand{\xao}{X_{A1}}
+#+LATEX: \renewcommand{\xat}{X_{A2}}
+#+LATEX: \renewcommand{\xbo}{X_{B1}}
+#+LATEX: \renewcommand{\xbt}{X_{B2}}
+#+LATEX: \renewcommand{\L}{\mathscr{L}}
+#+LATEX: \renewcommand{\st}{\hspace{8pt} \mbox{s.t.} \hspace{6pt}}
+#+LATEX: \renewcommand{\y}{{\bf y}}
+#+STARTUP: fninline
+
+*Environmental and Resource Economics* \hfill
+*ARE261*: Problem Set 03 \\
+\mbox{} \hfill Dan Hammer\\
+
+#+name: set-clojure-session-var-s2
+#+begin_src clojure :session s2 :results value :exports both
+  (def v [3 4 5 6 7 8 9])
+  (prn v)
+#+end_src

@@ -1,10 +1,6 @@
 (ns computing.infotheory
-  (:use [forma.matrix.utils]
-        [clojure.math.numeric-tower :only (sqrt floor abs expt)]
-        [clojure-csv.core])
-  (:require [incanter.core :as i]
-            [incanter.stats :as s]
-            [incanter.charts :as c]))
+  (:use [clojure.math.numeric-tower :only (sqrt floor abs expt)])
+  (:require [incanter.core :as i]))
 
 (defn- ordinal-idx
   "Returns a sequence of indices that rank the values of the supplied
@@ -27,9 +23,7 @@
   (let [subs (partition D 1 ts)]
     (frequencies (map ordinal-idx subs))))
 
-(defn- log-fn
-  "Returns the "
-  [x]
+(defn- log-fn [x]
   (* x (i/log2 x)))
 
 (defn- to-freq
@@ -53,6 +47,13 @@
   probability distribution of `ts` and the uniform distribution"
   [D ts]
   (- 1 (permutation-entropy D ts)))
+
+(defn critically-bad?
+  [bad all-types full]
+  (let [total-nil (count (positions nil? full))]
+    (if (or (nil? bad) (neg? total-nil))
+      (false? all-types))))
+
 
 (defn break-series
   [len & {:keys [avg1 avg2] :or {avg1 1 avg2 0.5}}]

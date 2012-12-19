@@ -76,4 +76,4 @@
 
 (defn dyn-slider
   [plot]
-  (c/slider #(i/set-data plot [(prob-seq %)]) (range 1.5 2.5 0.01)))
+  (c/slider #(i/set-data plot ) (range 1.5 2.5 0.01)))

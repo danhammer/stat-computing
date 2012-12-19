@@ -2,7 +2,8 @@
   "Functions for a particular example of kernel density smoothing
 toward kernel regression analysis.  Not suitable for general kernel
 smoothing."
-  (:use [clojure.contrib.math :only (abs)])
+  (:use [clojure.contrib.math :only (abs)]
+        [forma.classify.logistic])
   (:require [incanter.core :as i]
             [incanter.stats :as s]
             [incanter.charts :as c]))
@@ -23,6 +24,8 @@ smoothing."
            y-diff (abs (/ (- ys yi) h))
            m (if (and (< x-diff 1) (< y-diff 1)) 1 0)]
        (* m (- 1 x-diff) (- 1 y-diff)))))
+
+;; weights are summing to one
 
 (defn unif-kern
   "Returns the value of the uniform kernel function with bandwidth `h`
@@ -47,19 +50,19 @@ smoothing."
   ([f h xi-vec xs]
      (/ (reduce + (map (partial f h xs) xi-vec))
         (* h (count xi-vec))))
-  ([f h yi-vec ys xi-vec xs]
+  ([f h yi-vec xi-vec xs]
      {:pre [(= (count yi-vec) (count xi-vec))]}
-     (/ (reduce + (map (partial f h xs ys) xi-vec yi-vec))
+     (/ (reduce + (map * yi-vec (map (partial f h xs) xi-vec)))
         (* h (count xi-vec)))))
 
 (defn bivariate-kexp
   "Conditional expectation of y, given xs.  Avoid divide by zero
   error."
-  [f h yi-vec ys xi-vec xs]
+  [f h yi-vec xi-vec xs]
   (let [kern-x (kern-dens f h xi-vec xs)]
     (if (zero? kern-x)
       nil
-      (/ (kern-dens f h yi-vec ys xi-vec xs) kern-x))))
+      (/ (kern-dens f h yi-vec xi-vec xs) kern-x))))
 
 (defn bivariate-kreg
   "Returns a vector of conditional expectations of the dependent
@@ -68,18 +71,21 @@ smoothing."
 
    Example usage:
      (def xs (range -3 3 0.1))
+     (def ys (range -3 3 0.1))
      (def x (s/sample-normal 100))
      (def y (map + x (s/sample-normal 100 :sd 0.1)))
      (bivariate-kreg tri-kern 1 y x xs)"
   [f h yi-vec xi-vec xs-vec]
-  (let [scale (fn [x] (if (nil? x) nil (* h x)))]
-    (map scale (map (partial bivariate-kexp f h yi-vec xi-vec) xs-vec))))
+  (map (partial bivariate-kexp f h yi-vec xi-vec) xs-vec))
 
 (defn plot-kreg
   "Note that there are possible nil values, which are interpolated by
-  incanter (flat interpolation for line graphs)."
+  incanter (flat interpolation for line graphs).
+
+    Example usage: (plot-kreg tri-kern 0.2)"
   [f h]
   (let [xs (range -3 3 0.1)
+        ys (range -3 3 0.1)
         x (s/sample-normal 100)
         y (map + x (s/sample-normal 100 :sd 0.2))]
     (prn (bivariate-kreg f h y x xs))
@@ -159,3 +165,67 @@ smoothing."
   (let [h-vec (range 0.35 0.45 0.005)
         v (map (partial cv f) h-vec)]
     (i/view (c/xy-plot h-vec v))))
+
+;; Propensity score example; selection on observables k = 3, three
+;; observables, one treatment, and intercept (5 factors to generate y
+;; variable)
+
+(defn cofactor-mat
+  [n k]
+  (let [rand-vec (s/sample-normal (* n k))]
+    (i/matrix rand-vec k)))
+
+(defn make-binary [thresh x]
+  (if (> x thresh) 1 0))
+
+(defn treatment-vec
+  [n X]
+  (let [true-beta (i/matrix [1 2 3 2])
+        e (s/sample-normal n :sd (i/sqrt 0.5))
+        with-int (i/bind-columns X (i/matrix (repeat n 1)))]
+    (i/matrix
+     (map (partial make-binary 1.5)
+          (i/to-vect (i/plus e (i/mmult with-int true-beta)))))))
+
+(defn outcome-vec [X D]
+  (let [ones (i/matrix (repeat (i/nrow X) 1))
+        full-mat (i/bind-columns ones X D)
+        true-beta (i/matrix [1 1 1 1 3])]
+    (i/mmult full-mat true-beta)))
+
+(defn propensity-scores
+  [D X]
+  (let [with-int (i/bind-columns X (i/matrix (repeat (i/nrow X) 1)))
+        labels (to-double-rowmat (i/to-vect D))
+        features (to-double-matrix (vec (i/to-vect with-int)))
+        beta (logistic-beta-vector labels features 1e-8 1e-6 250)
+        predict (fn [b x] (vec (.toArray (logistic-prob (to-double-rowmat b) (to-double-rowmat x)))))]
+    (flatten (map (partial predict beta) (i/to-vect with-int)))))
+
+(defn treat-this [y d p]
+  (/ (* y d) p))
+
+(defn treat-wt [d p]
+  (/ d p))
+
+(defn notreat-this [y d p]
+  (/ (* y (- 1 d)) (- 1 p)))
+
+(defn notreat-wt [d p]
+  (/  (- 1 d) (- 1 p)))
+
+(defn estimates [Y D P]
+  (let [A (reduce + (map treat-this Y D P))
+        B (reduce + (map treat-wt D P))
+        C (reduce + (map notreat-this Y D P))
+        D (reduce + (map notreat-wt D P))]
+    (prn B)
+    (prn D)
+    (- (/ A B) (/ C D))))
+
+(defn get-estimate [n]
+  (let [X (cofactor-mat n 3)
+        D (treatment-vec n X)
+        Y (outcome-vec X D)
+        P (propensity-scores D X)]
+    (estimates Y D P)))
